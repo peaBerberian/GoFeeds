@@ -1,0 +1,61 @@
+{
+ "websites": [
+	{
+    "siteName": "ResidentAdvisor",
+    "siteLink": "http://www.residentadvisor.net",
+    "feedFormat": "rss",
+		"feedName": "ResidentAdvisor Album Reviews",
+		"feedLink": "http://www.residentadvisor.net/xml/review-album.xml",
+		"description": ""
+	},
+	{
+    "siteName": "Pitchfork",
+    "siteLink": "http://www.pitchfork.com",
+    "feedFormat": "rss",
+		"feedName": "Pitchfork Album Reviews",
+		"feedLink": "http://pitchfork.com/rss/reviews/albums/",
+		"description": ""
+	},
+	{
+    "siteName": "Stereogum",
+    "siteLink": "http://www.stereogum.com",
+    "feedFormat": "rss",
+		"feedName": "Stereogum News",
+		"feedLink": "http://www.stereogum.com/feed/",
+		"description":    ""
+	},
+	{
+    "siteName": "AOTY",
+    "siteLink": "http://www.albumoftheyear.org",
+    "feedFormat": "rss",
+		"feedName": "AOTY Album Reviews",
+		"feedLink": "http://feeds.feedburner.com/RecentlyRatedAlbums-AlbumOfTheYear?format=xml",
+		"description":    ""
+	},
+	{
+    "siteName": "Metacritic",
+    "siteLink": "http://www.metacritic.com",
+    "feedFormat": "rss",
+		"feedName": "Metacritic Album Reviews",
+		"feedLink": "http://www.metacritic.com/rss/music",
+		"description": ""
+	},
+	{
+    "siteName": "The Quietus",
+    "siteLink": "http://www.thequietus.com",
+    "feedFormat": "atom",
+		"feedName": "The Quietus News",
+		"feedLink": "http://thequietus.com/news?format=atom",
+		"description": ""
+	},
+	{
+    "siteName": "XLR8R",
+    "siteLink": "http://www.xlr8r.com",
+    "feedFormat": "rss",
+		"feedName": "XLR8R News",
+		"feedLink": "https://www.xlr8r.com/feed/",
+		"description": ""
+	}
+ ],
+ "cache": 3600000
+}

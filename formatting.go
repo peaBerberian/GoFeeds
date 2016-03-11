@@ -3,7 +3,6 @@ package main
 import "encoding/json"
 import "encoding/xml"
 import "time"
-import "fmt"
 import "errors"
 
 type rssFormat struct {
@@ -146,27 +145,6 @@ func parseAtom(atomMap atomFormat, web website) feedFormat {
 		})
 	}
 	return feed
-}
-
-func parseRssTime(str string) time.Time {
-	var feedTime, err = time.Parse(time.RFC1123, str)
-	if err != nil {
-		feedTime = time.Time{}
-	}
-	return feedTime
-}
-
-func parseAtomTime(str string) time.Time {
-	var feedTime, err = time.Parse(time.RFC3339, str)
-	if err != nil {
-		feedTime = time.Time{}
-	}
-	return feedTime
-}
-
-func timeToString(t time.Time) string {
-	return fmt.Sprintf("%d-%02d-%02dT%02d:%02d:%02d",
-		t.Year(), t.Month(), t.Day(), t.Hour(), t.Minute(), t.Second())
 }
 
 func convertFeedsToJson(feeds []feedFormat) ([]byte, error) {

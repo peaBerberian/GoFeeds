@@ -5,7 +5,6 @@ package requests
 
 import "net/http"
 import "io/ioutil"
-import "time"
 import "log"
 import "github.com/peaberberian/OscarGoGo/config"
 import "github.com/peaberberian/OscarGoGo/format"
@@ -19,7 +18,7 @@ import "github.com/peaberberian/OscarGoGo/format"
 //
 // Because this function launch various error-prones routines, and does
 // not exit on any of them, logs have been added in strategic points.
-func FetchWebsitesRss(websites []config.Website, cache *FeedCache, cacheTimeout int) []format.FeedFormat {
+func FetchWebsitesRss(websites []config.Website, cache *feedCache) []format.FeedFormat {
 	var res []format.FeedFormat
 	var _fetch = func(webs []config.Website) {
 		var c []chan httpResponse
@@ -34,7 +33,8 @@ func FetchWebsitesRss(websites []config.Website, cache *FeedCache, cacheTimeout 
 
 		// handle each response
 		for i, web := range webs {
-			// blocking
+			// blocking until response i arrive
+			// TODO take it in first arrived order
 			response := <-c[i]
 
 			if response.err != nil {
@@ -45,38 +45,25 @@ func FetchWebsitesRss(websites []config.Website, cache *FeedCache, cacheTimeout 
 				if errParse != nil {
 					log.Printf("XML Parsing error for %s: %s", web.SiteName, errParse)
 				} else {
-					cache.set(web.Id, feedRes)
+					cache.SetCacheForId(web.Id, feedRes)
 					res = append(res, feedRes)
 				}
 			}
 		}
 	}
 
-	// calculate here if we can use the cache for the wanted requests
-	if cacheTimeout > 0 {
-		var websitesToFetch []config.Website
+	var websitesToFetch []config.Website
 
-		// Checks cache
-		for _, web := range websites {
-			var shouldFetch = true
-			webCache, errCache := cache.get(web.Id)
-			if errCache == nil {
-				var cacheDate = webCache.date
-				var deltaNano = time.Now().Nanosecond() - cacheDate.Nanosecond()
-				if (deltaNano / 1000) < cacheTimeout {
-					shouldFetch = false
-					res = append(res, webCache.cache)
-				}
-			}
-			if shouldFetch {
-				websitesToFetch = append(websitesToFetch, web)
-			}
+	// Checks cache
+	for _, web := range websites {
+		webCache, errCache := cache.GetCacheForId(web.Id)
+		if errCache == nil {
+			res = append(res, webCache)
+		} else {
+			websitesToFetch = append(websitesToFetch, web)
 		}
-		_fetch(websitesToFetch)
-	} else {
-		// fetch all websites directly if no cache is set
-		_fetch(websites)
 	}
+	_fetch(websitesToFetch)
 	return res
 }
 

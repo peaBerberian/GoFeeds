@@ -20,6 +20,7 @@ func start() {
 	}
 	cacheTimeout = conf.cacheTime
 
+	// Fill cache before starting
 	_ = fetchWebsitesRss(conf.websites, &cache, cacheTimeout)
 
 	log.Printf("launching server")

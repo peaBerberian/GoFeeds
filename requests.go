@@ -5,6 +5,15 @@ import "io/ioutil"
 import "time"
 import "log"
 
+// Launch requests on every given website "feedLink", parse them, and
+// return them in the feedFormat.
+//
+// This function will check if the cache can be used on each request
+// intelligently (present for the website and does not exceed the
+// given cacheTimeout).
+//
+// Because this function launch various error-prones routines, and does
+// not exit on any of them, logs have been added in strategic points.
 func fetchWebsitesRss(websites []website, cache *feedCache, cacheTimeout int) []feedFormat {
 	var res []feedFormat
 	var _fetch = func(webs []website) {
@@ -37,6 +46,8 @@ func fetchWebsitesRss(websites []website, cache *feedCache, cacheTimeout int) []
 			}
 		}
 	}
+
+	// calculate here if we can use the cache for the wanted requests
 	if cacheTimeout > 0 {
 		var websitesToFetch []website
 
@@ -58,6 +69,7 @@ func fetchWebsitesRss(websites []website, cache *feedCache, cacheTimeout int) []
 		}
 		_fetch(websitesToFetch)
 	} else {
+		// fetch all websites directly if no cache is set
 		_fetch(websites)
 	}
 	return res

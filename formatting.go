@@ -200,29 +200,58 @@ func autoDetectFeedFormat(raw []byte) (string, error) {
 }
 
 func parseFeed(raw []byte, web website) (feedFormat, error) {
-	var rssRaw rssFormat
-	var atomRaw atomFormat
-	errRss := xml.Unmarshal(raw, &rssRaw)
-	errAtom := xml.Unmarshal(raw, &atomRaw)
-	if errRss == nil && (len(rssRaw.Channels.Items) > 0 ||
-		rssRaw.Channels.Title != "") {
-		ret := parseRss(rssRaw, web)
-		return ret, nil
-	}
+	var feedRes feedFormat
 
-	if errAtom == nil && (len(atomRaw.Entries) > 0 ||
-		atomRaw.Title != "") {
-		ret := parseAtom(atomRaw, web)
-		return ret, nil
-	}
+	switch web.feedFormat {
 
-	if errRss != nil {
-		return feedFormat{}, errRss
+	// parse RSS Feeds
+	case "rss":
+		var xmlBody rssFormat
+		err := xml.Unmarshal(raw, &xmlBody)
+		if err != nil {
+			return feedFormat{}, err
+		} else {
+			feedRes = parseRss(xmlBody, web)
+		}
+
+	// parse Atom feeds
+	case "atom":
+		var xmlBody atomFormat
+		err := xml.Unmarshal(raw, &xmlBody)
+		if err != nil {
+			return feedFormat{}, err
+		} else {
+			feedRes = parseAtom(xmlBody, web)
+		}
+
+	// Try to autodetect Feed type (duck-typing)
+	default:
+		var rssRaw rssFormat
+		var atomRaw atomFormat
+		errRss := xml.Unmarshal(raw, &rssRaw)
+		errAtom := xml.Unmarshal(raw, &atomRaw)
+
+		if errRss == nil && (len(rssRaw.Channels.Items) > 0 ||
+			rssRaw.Channels.Title != "") {
+			ret := parseRss(rssRaw, web)
+			return ret, nil
+		}
+
+		if errAtom == nil && (len(atomRaw.Entries) > 0 ||
+			atomRaw.Title != "") {
+			ret := parseAtom(atomRaw, web)
+			return ret, nil
+		}
+
+		if errRss != nil {
+			return feedFormat{}, errRss
+		}
+		if errAtom != nil {
+			return feedFormat{}, errAtom
+		}
+		return feedFormat{}, errors.New("Could not detect your feed format")
 	}
-	if errAtom != nil {
-		return feedFormat{}, errAtom
-	}
-	return feedFormat{}, errors.New("Could not detect your feed format")
+	return feedRes, nil
 }
 
 func convertWebsitesToJson(webs []website) ([]byte, error) {

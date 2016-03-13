@@ -2,10 +2,8 @@ package main
 
 import "net/http"
 import "io/ioutil"
-import "encoding/xml"
 import "time"
-
-import "fmt"
+import "log"
 
 func fetchWebsitesRss(websites []website, cache *feedCache, cacheTimeout int) []feedFormat {
 	var res []feedFormat
@@ -16,46 +14,23 @@ func fetchWebsitesRss(websites []website, cache *feedCache, cacheTimeout int) []
 		for i, web := range webs {
 			c = append(c, make(chan httpResponse))
 
-			fmt.Printf("launching for %s\n", web.feedLink)
+			log.Printf("launching for %s\n", web.feedLink)
 			go fetchUrl(web.feedLink, c[i])
 		}
 
 		// handle each response
 		for i, web := range webs {
+			// blocking
 			response := <-c[i]
-			if response.err == nil {
-				fmt.Printf("received for %s\n", web.siteName)
-				var feedRes feedFormat
-				var parsed = false
-				switch web.feedFormat {
 
-				// parse RSS Feeds
-				case "rss":
-					var xmlBody rssFormat
-					err := xml.Unmarshal(response.body, &xmlBody)
-					if err == nil {
-						feedRes = parseRss(xmlBody, web)
-						parsed = true
-					}
-
-				// parse Atom feeds
-				case "atom":
-					var xmlBody atomFormat
-					err := xml.Unmarshal(response.body, &xmlBody)
-					if err == nil {
-						feedRes = parseAtom(xmlBody, web)
-						parsed = true
-					}
-
-				// Try to autodetect Feed type (duck-typing)
-				default:
-					var err error
-					feedRes, err = parseFeed(response.body, web)
-					if err == nil {
-						parsed = true
-					}
-				}
-				if parsed {
+			if response.err != nil {
+				log.Printf("HTTP Error for %s: %s", web.siteName, response.err)
+			} else {
+				log.Printf("Response received for %s\n", web.siteName)
+				feedRes, errParse := parseFeed(response.body, web)
+				if errParse != nil {
+					log.Printf("XML Parsing error for %s: %s", web.siteName, errParse)
+				} else {
 					cache.set(web.id, feedRes)
 					res = append(res, feedRes)
 				}

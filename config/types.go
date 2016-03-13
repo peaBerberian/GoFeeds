@@ -1,8 +1,15 @@
 // This file provides structures definitions for the config file
-// (./config.json) accessible through the getConfig function.
+// (./config.json) accessible through the GetConfig function.
 
 package config
 
+// Config as seen by other modules
+type appConfig struct {
+	Websites  []Website
+	CacheTime int
+}
+
+// Website type used in the application
 type Website struct {
 	Id          int
 	SiteName    string
@@ -13,11 +20,7 @@ type Website struct {
 	Description string
 }
 
-type appConfig struct {
-	Websites  []Website
-	CacheTime int
-}
-
+// Exact structure of the config.json file
 type configFile struct {
 	// Websites configuration
 	Websites []struct {

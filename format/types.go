@@ -2,7 +2,7 @@ package format
 
 import "time"
 
-// standard feed format used, most notably in the feedCache
+// standard feed format used in the application
 type FeedFormat struct {
 	Id          int
 	Title       string
@@ -12,6 +12,16 @@ type FeedFormat struct {
 	Entries     []feedEntry
 }
 
+// single feed entry for the FeedFormat
+type feedEntry struct {
+	Title        string
+	Link         string
+	Description  string
+	CreationDate time.Time
+	UpdateDate   time.Time
+}
+
+// RSS xml format used on unMarshall
 type rssFormat struct {
 	Channels struct {
 		Title         string `xml:"title"`
@@ -30,6 +40,7 @@ type rssFormat struct {
 	} `xml:"channel"`
 }
 
+// RSS atom format used on unMarshall
 type atomFormat struct {
 	Title    string `xml:"title"`
 	Subtitle string `xml:"subtitle"`
@@ -54,23 +65,9 @@ type atomFormat struct {
 	} `xml:"entry"`
 }
 
-type feedEntry struct {
-	Title        string
-	Link         string
-	Description  string
-	CreationDate time.Time
-	UpdateDate   time.Time
-}
-
 // ---- JSON API ----
 
-type jsonItem struct {
-	Title        string `json:"title"`
-	Link         string `json:"link"`
-	Description  string `json:"description"`
-	CreationDate string `json:"creationDate"`
-}
-
+// used on json.marshall for constructing the API response
 type jsonFormat struct {
 	Id    int        `json:"id"`
 	Name  string     `json:"name"`
@@ -78,8 +75,19 @@ type jsonFormat struct {
 	Items []jsonItem `json:"items"`
 }
 
+// the API response for feeds will be an array of jsonFormat
 type jsonResponse []jsonFormat
 
+// single entry for the jsonFormat type
+type jsonItem struct {
+	Title        string `json:"title"`
+	Link         string `json:"link"`
+	Description  string `json:"description"`
+	CreationDate string `json:"creationDate"`
+}
+
+// used on json.marshall to describe the websites used in the 'websites'
+// api
 type websiteJSON struct {
 	Id          int    `json:"id"`
 	SiteName    string `json:"siteName"`

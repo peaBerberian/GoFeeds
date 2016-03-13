@@ -28,13 +28,17 @@ func isDeprecated(date time.Time, timeout int) bool {
 func (w *feedCache) cleanDeprecated() {
 	w.mutex.Lock()
 	var newWebsiteCache []websiteCache
+	var found = false
 	for i, webs := range w.websites {
 		if isDeprecated(webs.date, w.timeout) {
 			// delete from slice
 			newWebsiteCache = append(w.websites[:i], w.websites[i+1:]...)
+			found = true
 		}
 	}
-	w.websites = newWebsiteCache
+	if found {
+		w.websites = newWebsiteCache
+	}
 	w.mutex.Unlock()
 }
 

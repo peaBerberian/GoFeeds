@@ -22,7 +22,7 @@ type websiteCache struct {
 
 func isDeprecated(date time.Time, timeout int) bool {
 	var now = time.Now()
-	return timeout*1000 < now.Nanosecond()-date.Nanosecond()
+	return timeout*1e6 < now.Nanosecond()-date.Nanosecond()
 }
 
 func (w *feedCache) cleanDeprecated() {

@@ -1,13 +1,14 @@
-package main
+package requests
 
 import "net/http"
 import "io/ioutil"
 import "time"
 import "log"
-import config "github.com/peaberberian/OscarGoGo/config"
+import "github.com/peaberberian/OscarGoGo/config"
+import "github.com/peaberberian/OscarGoGo/format"
 
 // Launch requests on every given website "feedLink", parse them, and
-// return them in the feedFormat.
+// return them in the format.FeedFormat.
 //
 // This function will check if the cache can be used on each request
 // intelligently (present for the website and does not exceed the
@@ -15,8 +16,8 @@ import config "github.com/peaberberian/OscarGoGo/config"
 //
 // Because this function launch various error-prones routines, and does
 // not exit on any of them, logs have been added in strategic points.
-func fetchWebsitesRss(websites []config.Website, cache *feedCache, cacheTimeout int) []feedFormat {
-	var res []feedFormat
+func FetchWebsitesRss(websites []config.Website, cache *FeedCache, cacheTimeout int) []format.FeedFormat {
+	var res []format.FeedFormat
 	var _fetch = func(webs []config.Website) {
 		var c []chan httpResponse
 
@@ -37,7 +38,7 @@ func fetchWebsitesRss(websites []config.Website, cache *feedCache, cacheTimeout 
 				log.Printf("HTTP Error for %s: %s", web.SiteName, response.err)
 			} else {
 				log.Printf("Response received for %s\n", web.SiteName)
-				feedRes, errParse := parseFeed(response.body, web)
+				feedRes, errParse := format.ParseFeed(response.body, web)
 				if errParse != nil {
 					log.Printf("XML Parsing error for %s: %s", web.SiteName, errParse)
 				} else {

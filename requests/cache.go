@@ -6,27 +6,28 @@
 //   - set:   Set the cache for the corresponding id.
 //   - reset: Re-initalize the entire cache.
 
-package main
+package requests
 
 import "fmt"
 import "time"
 import "sync"
 import "errors"
+import "github.com/peaberberian/OscarGoGo/format"
 
 const MAX_CHACHE_ELEMENTS = 100
 
-type feedCache struct {
+type FeedCache struct {
 	websites []websiteCache
 	mutex    sync.Mutex
 }
 
 type websiteCache struct {
-	id    int        // linked to the ids in config.json
-	date  time.Time  // last update date
-	cache feedFormat // What was set at this date
+	id    int               // linked to the ids in config.json
+	date  time.Time         // last update date
+	cache format.FeedFormat // What was set at this date
 }
 
-func (w *feedCache) has(id int) bool {
+func (w *FeedCache) has(id int) bool {
 	w.mutex.Lock()
 	defer w.mutex.Unlock()
 	for _, webs := range w.websites {
@@ -37,7 +38,7 @@ func (w *feedCache) has(id int) bool {
 	return false
 }
 
-func (w *feedCache) get(id int) (websiteCache, error) {
+func (w *FeedCache) get(id int) (websiteCache, error) {
 	w.mutex.Lock()
 	defer w.mutex.Unlock()
 	for _, web := range w.websites {
@@ -49,7 +50,7 @@ func (w *feedCache) get(id int) (websiteCache, error) {
 	return websiteCache{}, errors.New(errorText)
 }
 
-func (w *feedCache) set(id int, data feedFormat) error {
+func (w *FeedCache) set(id int, data format.FeedFormat) error {
 	w.mutex.Lock()
 	defer w.mutex.Unlock()
 	for _, webs := range w.websites {
@@ -70,7 +71,7 @@ func (w *feedCache) set(id int, data feedFormat) error {
 }
 
 // Re-init the cache
-func (w *feedCache) reset() {
+func (w *FeedCache) reset() {
 	w.mutex.Lock()
 	w.websites = []websiteCache{}
 	w.mutex.Unlock()

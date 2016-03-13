@@ -3,7 +3,10 @@ package main
 import "fmt"
 import "log"
 import "net/http"
-import config "github.com/peaberberian/OscarGoGo/config"
+
+import "github.com/peaberberian/OscarGoGo/config"
+import reqs "github.com/peaberberian/OscarGoGo/requests"
+import "github.com/peaberberian/OscarGoGo/format"
 
 func main() {
 	log.Printf("starting application")
@@ -11,7 +14,7 @@ func main() {
 }
 
 func start() {
-	var cache feedCache
+	var cache reqs.FeedCache
 	var cacheTimeout int
 
 	var conf, readErr = config.GetConfig()
@@ -22,7 +25,7 @@ func start() {
 	cacheTimeout = conf.CacheTime
 
 	// Fill cache before starting
-	_ = fetchWebsitesRss(conf.Websites, &cache, cacheTimeout)
+	_ = reqs.FetchWebsitesRss(conf.Websites, &cache, cacheTimeout)
 
 	log.Printf("launching server")
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
@@ -35,8 +38,8 @@ func start() {
 			w.Header().Set("content-type", "application/json")
 			if r.URL.Path == "/feeds" {
 				log.Printf("GET /feeds")
-				res := fetchWebsitesRss(conf.Websites, &cache, cacheTimeout)
-				jsonRet, err := convertFeedsToJson(res)
+				res := reqs.FetchWebsitesRss(conf.Websites, &cache, cacheTimeout)
+				jsonRet, err := format.ConvertFeedsToJson(res)
 				if err != nil {
 					fmt.Fprintf(w, "[]")
 				} else {
@@ -45,7 +48,7 @@ func start() {
 				log.Printf("done")
 			} else if r.URL.Path == "/websites" {
 				log.Printf("GET /websites")
-				ret, err := convertWebsitesToJson(conf.Websites)
+				ret, err := format.ConvertWebsitesToJson(conf.Websites)
 				if err != nil {
 					fmt.Fprintf(w, "[]")
 				} else {

@@ -4,6 +4,7 @@ import "encoding/json"
 import "encoding/xml"
 import "time"
 import "errors"
+import config "github.com/peaberberian/OscarGoGo/config"
 
 type rssFormat struct {
 	Channels struct {
@@ -94,12 +95,12 @@ type websiteJSON struct {
 }
 
 // Convert an rssFormat to a feedFormat
-func parseRss(rssMap rssFormat, web website) feedFormat {
+func parseRss(rssMap rssFormat, web config.Website) feedFormat {
 	var feedTime = parseRssTime(rssMap.Channels.PubDate)
 	var feed = feedFormat{
-		Id:          web.id,
+		Id:          web.Id,
 		Title:       rssMap.Channels.Title,
-		Link:        web.feedLink,
+		Link:        web.FeedLink,
 		Description: rssMap.Channels.Description,
 		UpdateDate:  feedTime,
 	}
@@ -118,12 +119,12 @@ func parseRss(rssMap rssFormat, web website) feedFormat {
 }
 
 // Convert an atomFormat to a feedFormat
-func parseAtom(atomMap atomFormat, web website) feedFormat {
+func parseAtom(atomMap atomFormat, web config.Website) feedFormat {
 	var feedTime = parseAtomTime(atomMap.Updated)
 	var feed = feedFormat{
-		Id:          web.id,
+		Id:          web.Id,
 		Title:       atomMap.Title,
-		Link:        web.feedLink,
+		Link:        web.FeedLink,
 		Description: atomMap.Subtitle,
 		UpdateDate:  feedTime,
 	}
@@ -199,10 +200,10 @@ func autoDetectFeedFormat(raw []byte) (string, error) {
 	return "", errors.New("Could not detect your feed format")
 }
 
-func parseFeed(raw []byte, web website) (feedFormat, error) {
+func parseFeed(raw []byte, web config.Website) (feedFormat, error) {
 	var feedRes feedFormat
 
-	switch web.feedFormat {
+	switch web.FeedFormat {
 
 	// parse RSS Feeds
 	case "rss":
@@ -254,17 +255,17 @@ func parseFeed(raw []byte, web website) (feedFormat, error) {
 	return feedRes, nil
 }
 
-func convertWebsitesToJson(webs []website) ([]byte, error) {
+func convertWebsitesToJson(webs []config.Website) ([]byte, error) {
 	var websJson []websiteJSON
 	for _, web := range webs {
 		websJson = append(websJson, websiteJSON{
-			Id:          web.id,
-			Description: web.description,
-			FeedLink:    web.feedLink,
-			FeedName:    web.feedName,
-			FeedFormat:  web.feedFormat,
-			SiteLink:    web.siteLink,
-			SiteName:    web.siteName,
+			Id:          web.Id,
+			Description: web.Description,
+			FeedLink:    web.FeedLink,
+			FeedName:    web.FeedName,
+			FeedFormat:  web.FeedFormat,
+			SiteLink:    web.SiteLink,
+			SiteName:    web.SiteName,
 		})
 	}
 	ret, err := json.Marshal(websJson)

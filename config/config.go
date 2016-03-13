@@ -1,26 +1,26 @@
 // This file provides structures definitions for the config file
 // (./config.json) accessible through the getConfig function.
 
-package main
+package config
 
 import "encoding/json"
 import "os"
 
-const CONFIG_FILE_PATH = "./config.json"
+const CONFIG_FILE_PATH = "./config/config.json"
 
-type website struct {
-	id          int
-	siteName    string
-	siteLink    string
-	feedFormat  string
-	feedName    string
-	feedLink    string
-	description string
+type Website struct {
+	Id          int
+	SiteName    string
+	SiteLink    string
+	FeedFormat  string
+	FeedName    string
+	FeedLink    string
+	Description string
 }
 
 type appConfig struct {
-	websites  []website
-	cacheTime int
+	Websites  []Website
+	CacheTime int
 }
 
 type configFile struct {
@@ -42,7 +42,7 @@ type configFile struct {
 // Can return an error if:
 // 	 - the config file could not be read
 // 	 - the config file could not be decoded
-func getConfig() (appConfig, error) {
+func GetConfig() (appConfig, error) {
 	var ret appConfig
 	f, err := os.Open(CONFIG_FILE_PATH)
 	if err != nil {
@@ -54,17 +54,17 @@ func getConfig() (appConfig, error) {
 		return appConfig{}, decodeErr
 	}
 	ret = appConfig{
-		cacheTime: conf.Cache,
+		CacheTime: conf.Cache,
 	}
 	for i, item := range conf.Websites {
-		ret.websites = append(ret.websites, website{
-			id:          i,
-			siteName:    item.SiteName,
-			siteLink:    item.SiteLink,
-			feedFormat:  item.FeedFormat,
-			feedName:    item.FeedName,
-			feedLink:    item.FeedLink,
-			description: item.Description,
+		ret.Websites = append(ret.Websites, Website{
+			Id:          i,
+			SiteName:    item.SiteName,
+			SiteLink:    item.SiteLink,
+			FeedFormat:  item.FeedFormat,
+			FeedName:    item.FeedName,
+			FeedLink:    item.FeedLink,
+			Description: item.Description,
 		})
 	}
 	return ret, nil

@@ -4,6 +4,7 @@ import "net/http"
 import "io/ioutil"
 import "time"
 import "log"
+import config "github.com/peaberberian/OscarGoGo/config"
 
 // Launch requests on every given website "feedLink", parse them, and
 // return them in the feedFormat.
@@ -14,17 +15,17 @@ import "log"
 //
 // Because this function launch various error-prones routines, and does
 // not exit on any of them, logs have been added in strategic points.
-func fetchWebsitesRss(websites []website, cache *feedCache, cacheTimeout int) []feedFormat {
+func fetchWebsitesRss(websites []config.Website, cache *feedCache, cacheTimeout int) []feedFormat {
 	var res []feedFormat
-	var _fetch = func(webs []website) {
+	var _fetch = func(webs []config.Website) {
 		var c []chan httpResponse
 
 		// performs the requests for every given websites
 		for i, web := range webs {
 			c = append(c, make(chan httpResponse))
 
-			log.Printf("launching for %s\n", web.feedLink)
-			go fetchUrl(web.feedLink, c[i])
+			log.Printf("launching for %s\n", web.FeedLink)
+			go fetchUrl(web.FeedLink, c[i])
 		}
 
 		// handle each response
@@ -33,14 +34,14 @@ func fetchWebsitesRss(websites []website, cache *feedCache, cacheTimeout int) []
 			response := <-c[i]
 
 			if response.err != nil {
-				log.Printf("HTTP Error for %s: %s", web.siteName, response.err)
+				log.Printf("HTTP Error for %s: %s", web.SiteName, response.err)
 			} else {
-				log.Printf("Response received for %s\n", web.siteName)
+				log.Printf("Response received for %s\n", web.SiteName)
 				feedRes, errParse := parseFeed(response.body, web)
 				if errParse != nil {
-					log.Printf("XML Parsing error for %s: %s", web.siteName, errParse)
+					log.Printf("XML Parsing error for %s: %s", web.SiteName, errParse)
 				} else {
-					cache.set(web.id, feedRes)
+					cache.set(web.Id, feedRes)
 					res = append(res, feedRes)
 				}
 			}
@@ -49,12 +50,12 @@ func fetchWebsitesRss(websites []website, cache *feedCache, cacheTimeout int) []
 
 	// calculate here if we can use the cache for the wanted requests
 	if cacheTimeout > 0 {
-		var websitesToFetch []website
+		var websitesToFetch []config.Website
 
 		// Checks cache
 		for _, web := range websites {
 			var shouldFetch = true
-			webCache, errCache := cache.get(web.id)
+			webCache, errCache := cache.get(web.Id)
 			if errCache == nil {
 				var cacheDate = webCache.date
 				var deltaNano = time.Now().Nanosecond() - cacheDate.Nanosecond()

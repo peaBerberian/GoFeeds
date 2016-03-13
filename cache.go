@@ -1,9 +1,9 @@
 // This file describes the feedCache type used to store the RSS fetched
 // from various RSS URLs
 // A feedCache have 4 methods:
-//   - has:   Returns true if a cache is present for a specific Id.
-//   - get:   Returns the cache for the corresponding Id.
-//   - set:   Set the cache for the corresponding Id.
+//   - has:   Returns true if a cache is present for a specific id.
+//   - get:   Returns the cache for the corresponding id.
+//   - set:   Set the cache for the corresponding id.
 //   - reset: Re-initalize the entire cache.
 
 package main
@@ -21,16 +21,16 @@ type feedCache struct {
 }
 
 type websiteCache struct {
-	Id    int        // linked to the ids in config.json
-	Date  time.Time  // last update date
-	Cache feedFormat // What was set at this date
+	id    int        // linked to the ids in config.json
+	date  time.Time  // last update date
+	cache feedFormat // What was set at this date
 }
 
 func (w *feedCache) has(id int) bool {
 	w.mutex.Lock()
 	defer w.mutex.Unlock()
 	for _, webs := range w.websites {
-		if webs.Id == id {
+		if webs.id == id {
 			return true
 		}
 	}
@@ -41,7 +41,7 @@ func (w *feedCache) get(id int) (websiteCache, error) {
 	w.mutex.Lock()
 	defer w.mutex.Unlock()
 	for _, web := range w.websites {
-		if web.Id == id {
+		if web.id == id {
 			return web, nil
 		}
 	}
@@ -53,14 +53,14 @@ func (w *feedCache) set(id int, data feedFormat) error {
 	w.mutex.Lock()
 	defer w.mutex.Unlock()
 	for _, webs := range w.websites {
-		if webs.Id == id {
-			webs.Cache = data
-			webs.Date = time.Now()
+		if webs.id == id {
+			webs.cache = data
+			webs.date = time.Now()
 			return nil
 		}
 	}
-	newElem := websiteCache{Id: id,
-		Cache: data, Date: time.Now()}
+	newElem := websiteCache{id: id,
+		cache: data, date: time.Now()}
 	if len(w.websites) >= MAX_CHACHE_ELEMENTS {
 		w.websites[0] = newElem
 		return nil

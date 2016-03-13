@@ -70,11 +70,11 @@ func fetchWebsitesRss(websites []website, cache *feedCache, cacheTimeout int) []
 			var shouldFetch = true
 			if cache.has(web.id) {
 				webCache, _ := cache.get(web.id)
-				var cacheDate = webCache.Date
+				var cacheDate = webCache.date
 				var deltaNano = time.Now().Nanosecond() - cacheDate.Nanosecond()
 				if (deltaNano / 1000) < cacheTimeout {
 					shouldFetch = false
-					res = append(res, webCache.Cache)
+					res = append(res, webCache.cache)
 				}
 			}
 			if shouldFetch {

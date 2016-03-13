@@ -15,40 +15,8 @@ import "github.com/peaberberian/OscarGoGo/format"
 //
 // Because this function launch various error-prones routines, and does
 // not exit on any of them, logs have been added in strategic points.
-func FetchWebsitesRss(websites []config.Website, cache *feedCache) []format.FeedFormat {
+func GetFeeds(websites []config.Website, cache *feedCache) []format.FeedFormat {
 	var res []format.FeedFormat
-	var _fetch = func(webs []config.Website) {
-		var c []chan httpResponse
-
-		// performs the requests for every given websites
-		for i, web := range webs {
-			c = append(c, make(chan httpResponse))
-
-			log.Printf("launching for %s\n", web.FeedLink)
-			go fetchUrl(web.FeedLink, c[i])
-		}
-
-		// handle each response
-		for i, web := range webs {
-			// blocking until response i arrive
-			// TODO take it in first arrived order
-			response := <-c[i]
-
-			if response.err != nil {
-				log.Printf("HTTP Error for %s: %s", web.SiteName, response.err)
-			} else {
-				log.Printf("Response received for %s\n", web.SiteName)
-				feedRes, errParse := format.ParseFeed(response.body, web)
-				if errParse != nil {
-					log.Printf("XML Parsing error for %s: %s", web.SiteName, errParse)
-				} else {
-					cache.SetCacheForId(web.Id, feedRes)
-					res = append(res, feedRes)
-				}
-			}
-		}
-	}
-
 	var websitesToFetch []config.Website
 
 	// Checks cache
@@ -60,7 +28,43 @@ func FetchWebsitesRss(websites []config.Website, cache *feedCache) []format.Feed
 			websitesToFetch = append(websitesToFetch, web)
 		}
 	}
-	_fetch(websitesToFetch)
+
+	fetchedFeeds := fetchFeeds(websitesToFetch, cache)
+	res = append(res, fetchedFeeds...)
+	return res
+}
+
+func fetchFeeds(webs []config.Website, cache *feedCache) []format.FeedFormat {
+	var chanRequest []chan httpResponse
+	var res []format.FeedFormat
+
+	// performs the requests for every given websites
+	for i, web := range webs {
+		chanRequest = append(chanRequest, make(chan httpResponse))
+
+		log.Printf("launching for %s\n", web.FeedLink)
+		go fetchUrl(web.FeedLink, chanRequest[i])
+	}
+
+	// handle each response
+	for i, web := range webs {
+		// blocking until response i arrive
+		// TODO take it in first arrived order
+		response := <-chanRequest[i]
+
+		if response.err != nil {
+			log.Printf("HTTP Error for %s: %s", web.SiteName, response.err)
+		} else {
+			log.Printf("Response received for %s\n", web.SiteName)
+			feedRes, errParse := format.ParseFeed(response.body, web)
+			if errParse != nil {
+				log.Printf("XML Parsing error for %s: %s", web.SiteName, errParse)
+			} else {
+				cache.SetCacheForId(web.Id, feedRes)
+				res = append(res, feedRes)
+			}
+		}
+	}
 	return res
 }
 

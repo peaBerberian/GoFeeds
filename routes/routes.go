@@ -12,7 +12,7 @@ func StartServer(conf config.AppConfig) {
 	var cache = reqs.NewCache(conf.CacheTime)
 
 	// Fill cache before starting
-	_ = reqs.FetchWebsitesRss(conf.Websites, &cache)
+	_ = reqs.GetFeeds(conf.Websites, &cache)
 
 	log.Printf("launching server")
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
@@ -25,7 +25,7 @@ func StartServer(conf config.AppConfig) {
 			w.Header().Set("content-type", "application/json")
 			if r.URL.Path == "/feeds" {
 				log.Printf("GET /feeds")
-				res := reqs.FetchWebsitesRss(conf.Websites, &cache)
+				res := reqs.GetFeeds(conf.Websites, &cache)
 				jsonRet, err := format.ConvertFeedsToJson(res)
 				if err != nil {
 					fmt.Fprintf(w, "[]")

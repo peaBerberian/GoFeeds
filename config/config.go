@@ -9,18 +9,18 @@ const CONFIG_FILE_PATH = "./config/config.json"
 // Can return an error if:
 // 	 - the config file could not be read
 // 	 - the config file could not be decoded
-func GetConfig() (appConfig, error) {
-	var ret appConfig
+func GetConfig() (AppConfig, error) {
+	var ret AppConfig
 	f, err := os.Open(CONFIG_FILE_PATH)
 	if err != nil {
-		return appConfig{}, err
+		return AppConfig{}, err
 	}
 	var conf configFile
 	dec := json.NewDecoder(f)
 	if decodeErr := dec.Decode(&conf); decodeErr != nil {
-		return appConfig{}, decodeErr
+		return AppConfig{}, decodeErr
 	}
-	ret = appConfig{
+	ret = AppConfig{
 		CacheTime: conf.Cache,
 	}
 	for i, item := range conf.Websites {

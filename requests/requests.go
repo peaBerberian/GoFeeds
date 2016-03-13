@@ -1,3 +1,6 @@
+// This file defines functions allowing to perform requests on other
+// servers
+
 package requests
 
 import "net/http"

@@ -4,7 +4,7 @@
 package config
 
 // Config as seen by other modules
-type appConfig struct {
+type AppConfig struct {
 	Websites  []Website
 	CacheTime int
 }

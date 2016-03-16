@@ -42,8 +42,10 @@ func (w *feedCache) cleanDeprecated() {
 	w.mutex.Unlock()
 }
 
-func NewCache(timeout int) feedCache {
-	return feedCache{timeout: timeout}
+func NewCache(timeout int) *feedCache {
+	var fc = new(feedCache)
+	fc.timeout = timeout
+	return fc
 }
 
 func (w *feedCache) HasCacheForId(id int) bool {
